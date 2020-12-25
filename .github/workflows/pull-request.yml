@@ -1,0 +1,49 @@
+'on': pull_request
+
+name: MyTowerDefenceVR Pipeline
+
+jobs:
+
+  build:
+    runs-on: [self-hosted,macOS,unity,antonio]
+
+    env:
+      UNITY_VERSION: 2020.2.0f1
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+        clean: false
+        fetch-depth: 0
+        
+    
+    - name: Unity Edit Test
+      run: |
+        /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity -batchmode -nographics -logFile \
+          -projectPath ./ -testPlatform editmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageOptions "generateAdditionalMetrics;assemblyFilters:+Root"
+
+    - name: Unity Play Test
+      run: |
+        /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity -batchmode -nographics -logFile \
+          -projectPath ./ -testPlatform playmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageOptions "generateAdditionalMetrics;assemblyFilters:+Root"
+    
+    - name: Copy Coverage Reports
+      run: |
+        cp CodeCoverage/MyTowerDefenceVR-opencov/EditMode/TestCoverageResults_0000.xml EditMode.xml
+        cp CodeCoverage/MyTowerDefenceVR-opencov/PlayMode/TestCoverageResults_0000.xml PlayMode.xml   
+    
+    - name: Codecov
+      # You may pin to the exact commit or the version.
+      # uses: codecov/codecov-action@1fc7722ded4708880a5aea49f2bfafb9336f0c8d
+      uses: codecov/codecov-action@v1.1.1
+      with:
+        files: ./EditMode.xml,./PlayMode.xml
+        # Specify whether or not CI build should fail if Codecov runs into an error during upload
+        fail_ci_if_error: true
+    
+    - name: CleanUp
+      run: |
+        rm -f -r CodeCoverage
+        find ./ -name '*.xml' -delete
