@@ -4,4 +4,9 @@ using UnityEngine;
 
 public interface IGameFieldPositionableCollector
 {
+    void UpdateEnemyInRange(Vector3[] targets);
+
+    void DockedInSlot(Vector3 slotPosition);
+
+    void Undocked();
 }

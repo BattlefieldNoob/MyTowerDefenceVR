@@ -4,4 +4,10 @@ using UnityEngine;
 
 public interface IGameFieldPositionableActuator
 {
+    Quaternion GetBaseRotation();
+    
+    bool ShouldAttack();
+
+    Vector3 GetTargetAttack();
+
 }
